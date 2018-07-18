@@ -120,11 +120,15 @@ def generate_mask(mask_pairs, mask_margin, data, key='time', progress=None):
 
         for i, t in enumerate(data[pair[0]][key]):
 
-            j = find_nearest_index(data[pair[1]][key], t)
+            j = find_nearest_index(data[pair[1]][key], t, seq=True, seek=False)
+            
+            if data[pair[0]][key][i] == data[pair[1]][key][j]:
+                #j += 1
+                pass
             
             try:
                 lower = (data[pair[0]][key][i] - mask_margin[0] > data[pair[1]][key][j])
-                upper = (data[pair[0]][key][i] - mask_margin[1] < data[pair[1]][key][j])
+                upper = (data[pair[0]][key][i] - mask_margin[1] < data[pair[1]][key][j+1])
                 
                 #print("Index found at:  {}\t{}\t{}\t{}".format(pair[0], i, pair[1], j))
 
