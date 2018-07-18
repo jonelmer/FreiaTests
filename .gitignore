@@ -1,5 +1,7 @@
 **/*.tdms
 **/*.tdms_index
+data/
+
 **/*.pyc
 **/*.p
 
