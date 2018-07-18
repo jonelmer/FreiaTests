@@ -1,0 +1,7 @@
+**/*.tdms
+**/*.tdms_index
+**/*.pyc
+**/*.p
+
+.ipynb_checkpoints/
+__pycache__/
