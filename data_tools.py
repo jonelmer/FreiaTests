@@ -115,6 +115,7 @@ def generate_mask(mask_pairs, mask_margin, data, key='time', progress=None):
         p_val = 0
     
     for pair in mask_pairs:
+        print(pair)
         
         mask = np.array([False,] * len(data[pair[0]][key]))
 
@@ -122,8 +123,16 @@ def generate_mask(mask_pairs, mask_margin, data, key='time', progress=None):
 
             j = find_nearest_index(data[pair[1]][key], t, seq=True, seek=False)
             
-            if data[pair[0]][key][i] == data[pair[1]][key][j]:
-                #j += 1
+            
+            # Quick fix - sometimes the values are close so the next j is found??
+            try:
+                d = (data[pair[0]][key][i] - data[pair[1]][key][j+1])
+
+                if d > mask_margin[0]:
+                    j += 1
+                    #print(data[pair[0]][key][i])
+                    pass
+            except IndexError:
                 pass
             
             try:
@@ -182,6 +191,8 @@ def calculate_differences(diff_pairs, data, key='time', progress=None):
 
         if type(pair[0][1]) != list:
             pair[0][1] = [pair[0][1], ]
+            
+        print(pair)
 
         diff = [np.array([None,] * len(data[pair[0][0]][key])),] * len(pair[0][1])
 
