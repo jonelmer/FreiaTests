@@ -77,6 +77,20 @@ def moving_average(a, n=3) :
     return ret[n - 1:] / n
 
 
+def data_rates(data):
+    # Find the data rates
+    rate = dict()
+
+    for k in data:
+        try:
+            time_delta = [u - t for t, u in zip(data[k]['time'], data[k]['time'][1:])]
+            rate[k] = np.mean(time_delta).total_seconds()
+        except KeyError:
+            pass
+    
+    return rate
+
+
 def generate_mask(mask_pairs, mask_margin, data, key='time', progress=None):
     """
     Pairs to create a mask of mask_pairs[1] onto mask_pairs[0], with the supplied margin
@@ -219,4 +233,63 @@ def calculate_differences(diff_pairs, data, key='time', progress=None):
 
     if progress:
         # Finised - max out the progress bar 
+        progress.value = progress.max
+        
+        
+        
+def aggregate_data(key_to_aggregate, key_for_window, data, progress=None):
+    """
+    Calculate the min, mean, max of the key to aggregate, according to the window supplied
+    """
+    
+    if progress:
+        progress.max = len(data[key_for_window[0]][key_for_window[1]])-1
+
+    average = [None, ] * len(data[key_for_window[0]][key_for_window[1]])
+    maximum = [None, ] * len(data[key_for_window[0]][key_for_window[1]])
+    minimum = [None, ] * len(data[key_for_window[0]][key_for_window[1]])
+
+    diff_ma = np.ma.MaskedArray(data[key_to_aggregate[0]][key_to_aggregate[1]], 
+                                mask=data[key_to_aggregate[0]]["_".join(["mask", key_for_window[0]])])
+    
+    i = None
+
+    #for t in range(len(data[key_for_window[0]][key_for_window[1]]))[:-1]:
+            
+        #i = find_nearest_index(data[key_to_aggregate[0]][key_for_window[1]], 
+        #                       data[key_for_window[0]][key_for_window[1]][t])
+        #j = find_nearest_index(data[key_to_aggregate[0]][key_for_window[1]], 
+        #                       data[key_for_window[0]][key_for_window[1]][t+1])
+        
+    for z, t in enumerate(data[key_for_window[0]][key_for_window[1]]):
+             
+        if i is None:
+            i = find_nearest_index(data[key_to_aggregate[0]][key_for_window[1]], t)
+            continue
+        
+        j = find_nearest_index(data[key_to_aggregate[0]][key_for_window[1]][i:], t, seq=True) + i
+        
+        #pprint([i, j])
+        #pprint(diff_ma[i:j])
+    
+        average[z] = np.mean(diff_ma[i:j])
+        try:
+            maximum[z] = np.max(diff_ma[i:j].compressed())
+            minimum[z] = np.min(diff_ma[i:j].compressed())
+        except ValueError:
+            pprint([i, j])
+            pprint(diff_ma[i:j])
+            pprint([minimum[z], average[z], maximum[z]])
+        
+        i = j
+    
+        if progress:
+            progress.value += 1
+    
+        # Save the data every iteration, in case there is an error!
+        data[key_for_window[0]]["_".join(["avg",] + key_to_aggregate)] = average
+        data[key_for_window[0]]["_".join(["max",] + key_to_aggregate)] = maximum
+        data[key_for_window[0]]["_".join(["min",] + key_to_aggregate)] = minimum
+    
+    if progress:
         progress.value = progress.max
