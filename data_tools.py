@@ -43,7 +43,7 @@ def find_nearest_index(array, value, seek=True, seq=False):
 
 
     
-def truncate(limits, data, key='time'):
+def truncate(limits, data, key='time', find_mode=dict()):
     """
     Truncate data to the supplied time limits
     
@@ -59,8 +59,8 @@ def truncate(limits, data, key='time'):
     
     output = dict()
 
-    i_start = max(find_nearest_index(data[key], min(limits)), 0)
-    i_stop  = find_nearest_index(data[key], max(limits))
+    i_start = max(find_nearest_index(data[key], min(limits), **find_mode), 0)
+    i_stop  = find_nearest_index(data[key], max(limits), **find_mode)
              
     for k in data:
         output[k] = data[k][i_start:i_stop]

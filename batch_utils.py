@@ -44,11 +44,15 @@ def print_lengths(d, label="Dataset:"):
         print("{}: \t{} points".format(k, len(d[k][[*d[k]][0]])))
 
         
-def print_structure(data):
+def print_structure(data, length=False):
     for k in data:
         print(k)
         for l in data[k]:
-            print("\t"+l)
+            if length:
+                print("\t{}\t\t{}".format(l, len(data[k][l])))
+            else:
+                print("\t"+l)
+
 
 def calculate_trans(data, p=None):
     if p is not None:
