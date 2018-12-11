@@ -1,24 +1,30 @@
 import pickle
+import simplejson
 import numpy as np
 from pprint import pprint
 import data_tools
 import copy
 
-def pickle_name(filename, keyence_filename=None, suffix="full_data", data_dir=".\\data\\"):
+def pickle_name(filename, keyence_filename=None, suffix="full_data", data_dir=".\\data\\", extension='.p'):
     if keyence_filename is not None:
-        pickle_file = data_dir + "_".join([filename, keyence_filename, suffix]) + ".p"
+        pickle_file = data_dir + "_".join([filename, keyence_filename, suffix]) + extension
     else:
-        pickle_file = data_dir + "_".join([filename, suffix]) + ".p"
+        pickle_file = data_dir + "_".join([filename, suffix]) + extension
     
     return pickle_file
 
 
-def load_data(filename, keyence_filename=None, suffix="full_data"):
+def load_data(filename, keyence_filename=None, suffix="full_data", mode="pickle"):
     
-    pickle_file = pickle_name(filename, keyence_filename, suffix)
-    
-    full_data = pickle.load(open(pickle_file, 'rb'))
-    print("Loaded the data from " + pickle_file)
+    if mode=="pickle":
+        pickle_file = pickle_name(filename, keyence_filename, suffix, extension='.p')
+        full_data = pickle.load(open(pickle_file, 'rb'))
+        print("Loaded the data from " + pickle_file)
+        
+    elif mode=="json":
+        pickle_file = pickle_name(filename, keyence_filename, suffix, extension='.json')
+        full_data = simplejson.load(open(pickle_file, 'r'))
+        print("Loaded the data from " + pickle_file)
 
     # Pop the info out, it can't be processed...
     info = full_data.pop("info")
@@ -26,16 +32,20 @@ def load_data(filename, keyence_filename=None, suffix="full_data"):
     return full_data, info
 
 
-def store_data(data, filename, keyence_filename=None, suffix="proc_data_partial", info=None):
-    pickle_file = pickle_name(filename, keyence_filename, suffix)
-    
+def store_data(data, filename, keyence_filename=None, suffix="proc_data_partial", info=None, mode="pickle"):
     if info is not None:
         # Add the info back in before pickling...
         data['info'] = info
-
-    pickle.dump(data, open(pickle_file, 'wb'))
-
-    print("Stored the data in {}".format(pickle_file))
+        
+    if mode=="pickle":
+        pickle_file = pickle_name(filename, keyence_filename, suffix, extension='.p')
+        pickle.dump(data, open(pickle_file, 'wb'))
+        print("Stored the data in {}".format(pickle_file))
+        
+    elif mode=="json":
+        pickle_file = pickle_name(filename, keyence_filename, suffix, extension='.json')
+        simplejson.dump(data, open(pickle_file, 'w'))
+        print("Stored the data in {}".format(pickle_file))    
 
 
 def print_lengths(d, label="Dataset:"):
